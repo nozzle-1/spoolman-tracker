@@ -1,0 +1,26 @@
+{
+  "logging": {
+    "level": "info"
+  },
+  "spoolman": {
+    "baseUrl": "https://spoolman.example.com/api/v1",
+    "timeoutMs": 10000
+  },
+  "supervision": {
+    "probeIntervalMs": 15000,
+    "offlineBackoffMs": 30000,
+    "connectTimeoutMs": 5000
+  },
+  "printers": [
+    {
+      "id": "x1c",
+      "platform": "bambulab",
+      "enabled": true,
+      "host": "192.168.1.50",
+      "serial": "01PXXXXXXXXXXXX",
+      "accessCode": "12345678",
+      "username": "bblp",
+      "mqttPort": 8883
+    }
+  ]
+}
