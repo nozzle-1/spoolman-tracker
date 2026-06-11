@@ -24,7 +24,9 @@
       "serial": "01PXXXXXXXXXXXX",
       "accessCode": "12345678",
       "username": "bblp",
-      "mqttPort": 8883
+      "mqttPort": 8883,
+      "mqttReconnectMs": 30000,
+      "mqttSessionDurationMs": 5000
     }
   ]
 }

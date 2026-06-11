@@ -36,6 +36,7 @@ export interface BambuPrinterConfig extends BasePrinterConfig {
   mqttPort?: number;
   mqttConnectTimeoutMs?: number;
   mqttReconnectMs?: number;
+  mqttSessionDurationMs?: number;
   pushAllOnConnect?: boolean;
 }
 

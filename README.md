@@ -36,6 +36,8 @@ Main options:
 - `supervision.probeIntervalMs`: optional TCP probe interval
 - `supervision.connectTimeoutMs`: optional TCP probe timeout
 - `printers[]`: list of printers to monitor
+- `printers[].mqttReconnectMs`: reconnect delay after a disconnected MQTT session
+- `printers[].mqttSessionDurationMs`: optional maximum MQTT session length; set this to a few seconds if Bambu Studio needs the local MQTT slot
 
 Example:
 
@@ -58,7 +60,9 @@ Example:
       "enabled": true,
       "host": "192.168.1.50",
       "serial": "01PXXXXXXXXXXXX",
-      "accessCode": "12345678"
+      "accessCode": "12345678",
+      "mqttReconnectMs": 30000,
+      "mqttSessionDurationMs": 5000
     }
   ]
 }

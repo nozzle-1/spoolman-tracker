@@ -151,6 +151,10 @@ function parsePrinterConfig(raw: unknown, index: number): PrinterConfig {
       `printers[${index}].mqttConnectTimeoutMs`
     ),
     mqttReconnectMs: ensureOptionalNumber(raw.mqttReconnectMs, `printers[${index}].mqttReconnectMs`),
+    mqttSessionDurationMs: ensureOptionalNumber(
+      raw.mqttSessionDurationMs,
+      `printers[${index}].mqttSessionDurationMs`
+    ),
     pushAllOnConnect: ensureOptionalBoolean(raw.pushAllOnConnect, `printers[${index}].pushAllOnConnect`)
   };
 
