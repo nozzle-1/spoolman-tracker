@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "changelog-path": "CHANGELOG.md",
+      "initial-version": "0.1.0",
+      "draft-pull-request": true,
+      "pull-request-header": "This PR prepares the next release."
+    }
+  }
+}
