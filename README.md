@@ -31,6 +31,8 @@ Main options:
 - `spoolman.baseUrl`: Spoolman API base URL
 - `spoolman.apiKey`: optional API key
 - `spoolman.timeoutMs`: optional HTTP timeout
+- `spoolman.autoArchiveEmptySpool.enabled`: enables periodic archival of active spools whose `remaining_weight` is `0`
+- `spoolman.autoArchiveEmptySpool.intervalSeconds`: archival interval in seconds
 - `supervision.probeIntervalMs`: optional TCP probe interval
 - `supervision.connectTimeoutMs`: optional TCP probe timeout
 - `printers[]`: list of printers to monitor
@@ -43,7 +45,11 @@ Example:
     "level": "info"
   },
   "spoolman": {
-    "baseUrl": "http://spoolman:7912/api/v1"
+    "baseUrl": "http://spoolman:7912/api/v1",
+    "autoArchiveEmptySpool": {
+      "enabled": true,
+      "intervalSeconds": 3600
+    }
   },
   "printers": [
     {

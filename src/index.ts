@@ -13,12 +13,14 @@ async function main() {
   const shutdown = async (signal: string) => {
     logger.info("Shutdown requested", { signal });
     await supervisor.stop();
+    await spoolman.stop();
     process.exit(0);
   };
 
   process.on("SIGINT", () => void shutdown("SIGINT"));
   process.on("SIGTERM", () => void shutdown("SIGTERM"));
 
+  await spoolman.start();
   await supervisor.start();
 }
 

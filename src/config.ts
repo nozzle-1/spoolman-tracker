@@ -75,10 +75,24 @@ function parseSpoolmanConfig(raw: unknown): SpoolmanConfig {
     throw new Error('Invalid config: "spoolman" section is required');
   }
 
+  const autoArchiveEmptySpool = raw.autoArchiveEmptySpool;
+  if (autoArchiveEmptySpool !== undefined && !isObject(autoArchiveEmptySpool)) {
+    throw new Error('Invalid config: "spoolman.autoArchiveEmptySpool" must be an object');
+  }
+
   return {
     baseUrl: ensureString(raw.baseUrl, "spoolman.baseUrl").replace(/\/+$/, ""),
     apiKey: ensureOptionalString(raw.apiKey, "spoolman.apiKey"),
-    timeoutMs: ensureOptionalNumber(raw.timeoutMs, "spoolman.timeoutMs")
+    timeoutMs: ensureOptionalNumber(raw.timeoutMs, "spoolman.timeoutMs"),
+    autoArchiveEmptySpool: autoArchiveEmptySpool
+      ? {
+          enabled: ensureOptionalBoolean(autoArchiveEmptySpool.enabled, "spoolman.autoArchiveEmptySpool.enabled"),
+          intervalSeconds: ensureOptionalNumber(
+            autoArchiveEmptySpool.intervalSeconds,
+            "spoolman.autoArchiveEmptySpool.intervalSeconds"
+          )
+        }
+      : undefined
   };
 }
 

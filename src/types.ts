@@ -5,6 +5,10 @@ export interface SpoolmanConfig {
   baseUrl: string;
   apiKey?: string;
   timeoutMs?: number;
+  autoArchiveEmptySpool?: {
+    enabled?: boolean;
+    intervalSeconds?: number;
+  };
 }
 
 export interface LoggingConfig {

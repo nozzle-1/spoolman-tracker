@@ -4,7 +4,11 @@
   },
   "spoolman": {
     "baseUrl": "https://spoolman.example.com/api/v1",
-    "timeoutMs": 10000
+    "timeoutMs": 10000,
+    "autoArchiveEmptySpool": {
+      "enabled": false,
+      "intervalSeconds": 3600
+    }
   },
   "supervision": {
     "probeIntervalMs": 15000,

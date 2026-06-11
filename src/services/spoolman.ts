@@ -4,6 +4,7 @@ import type { SpoolmanConfig, SpoolUpdate } from "../types.ts";
 interface SpoolmanSpool {
   id: number;
   remaining_weight: string | number | null;
+  archived?: boolean;
   extra?: {
     tag?: string;
     [key: string]: unknown;
@@ -27,12 +28,40 @@ export class SpoolmanClient {
   private readonly baseUrl: string;
   private readonly apiKey?: string;
   private readonly timeoutMs: number;
+  private readonly autoArchiveZeroWeightEnabled: boolean;
+  private readonly autoArchiveZeroWeightIntervalMs: number;
   private readonly spoolIdByTag = new Map<string, number>();
+  private autoArchiveTimer: NodeJS.Timeout | null = null;
+  private autoArchiveRunning = false;
 
   constructor(config: SpoolmanConfig) {
     this.baseUrl = config.baseUrl.replace(/\/+$/, "");
     this.apiKey = config.apiKey;
     this.timeoutMs = config.timeoutMs ?? 10_000;
+    this.autoArchiveZeroWeightEnabled = config.autoArchiveEmptySpool?.enabled ?? false;
+    this.autoArchiveZeroWeightIntervalMs = (config.autoArchiveEmptySpool?.intervalSeconds ?? 3600) * 1000;
+  }
+
+  async start(): Promise<void> {
+    if (!this.autoArchiveZeroWeightEnabled || this.autoArchiveZeroWeightIntervalMs <= 0) {
+      return;
+    }
+
+    logger.info("Starting automatic Spoolman archival task", {
+      intervalMs: this.autoArchiveZeroWeightIntervalMs
+    });
+
+    await this.runAutoArchivePass();
+    this.autoArchiveTimer = setInterval(() => {
+      void this.runAutoArchivePass();
+    }, this.autoArchiveZeroWeightIntervalMs);
+  }
+
+  async stop(): Promise<void> {
+    if (this.autoArchiveTimer) {
+      clearInterval(this.autoArchiveTimer);
+      this.autoArchiveTimer = null;
+    }
   }
 
   async updateRemainingWeight(update: SpoolUpdate): Promise<void> {
@@ -81,6 +110,54 @@ export class SpoolmanClient {
       remainingWeightG: update.remainingWeight,
       previousWeightG: update.previousWeight
     });
+  }
+
+  async archiveZeroWeightSpools(): Promise<void> {
+    const spools = await this.request<SpoolmanSpool[]>("/spool?allow_archived=false", { method: "GET" });
+    const emptySpools = spools.filter((spool) => toNumber(spool.remaining_weight) === 0);
+
+    if (emptySpools.length === 0) {
+      logger.debug("No Spoolman spools to archive");
+      return;
+    }
+
+    for (const spool of emptySpools) {
+      await this.request(`/spool/${spool.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          archived: true
+        })
+      });
+    }
+
+    for (const [tag, spoolId] of this.spoolIdByTag.entries()) {
+      if (emptySpools.some((spool) => spool.id === spoolId)) {
+        this.spoolIdByTag.delete(tag);
+      }
+    }
+
+    logger.info("Archived empty Spoolman spools", {
+      archivedCount: emptySpools.length,
+      spoolIds: emptySpools.map((spool) => spool.id)
+    });
+  }
+
+  private async runAutoArchivePass(): Promise<void> {
+    if (this.autoArchiveRunning) {
+      logger.debug("Skipping Spoolman archival pass because the previous run is still active");
+      return;
+    }
+
+    this.autoArchiveRunning = true;
+    try {
+      await this.archiveZeroWeightSpools();
+    } catch (error: unknown) {
+      logger.error("Automatic Spoolman archival task failed", {
+        message: error instanceof Error ? error.message : String(error)
+      });
+    } finally {
+      this.autoArchiveRunning = false;
+    }
   }
 
   private async findSpoolByTag(tag: string): Promise<SpoolmanSpool | null> {
