@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/nozzle-1/spoolman-tracker/compare/v0.3.1...v0.4.0) (2026-06-11)
+
+
+### Features
+
+* add startup banner display in main application ([99081c1](https://github.com/nozzle-1/spoolman-tracker/commit/99081c1cf8ac196d8fd4aea04ed5967080ad30e9))
+
 ## [0.3.1](https://github.com/nozzle-1/spoolman-tracker/compare/v0.3.0...v0.3.1) (2026-06-11)
 
 
