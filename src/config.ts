@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { logger, setLogLevel } from "./logger.ts";
+import { createLogger, setLogLevel } from "./logger.ts";
 import type {
   AppConfig,
   BambuPrinterConfig,
@@ -13,6 +13,7 @@ import type {
 } from "./types.ts";
 
 const DEFAULT_CONFIG_PATH = path.join(process.cwd(), "config.json");
+const logger = createLogger("Config");
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

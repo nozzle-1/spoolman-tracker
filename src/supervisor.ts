@@ -1,10 +1,11 @@
-import { logger } from "./logger.ts";
+import { createLogger } from "./logger.ts";
 import { createPrinterRuntime } from "./platforms/index.ts";
 import { probeTcpHost } from "./services/tcp-probe.ts";
 import type { PrinterConfig, PrinterRuntime, SpoolUpdate, SupervisionConfig } from "./types.ts";
 import { SpoolmanClient } from "./services/spoolman.ts";
 
 const INFO_LIFECYCLE_EVENTS = new Set(["connected", "closed", "stopped"]);
+const logger = createLogger("PrinterSupervisor");
 
 interface RuntimeEntry {
   config: PrinterConfig;

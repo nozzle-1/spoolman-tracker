@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import mqtt, { type MqttClient } from "mqtt";
 
-import { logger } from "../logger.ts";
+import { createLogger } from "../logger.ts";
 import type {
   BambuPrinterConfig,
   LifecycleEvent,
@@ -38,6 +38,8 @@ function correctRemainPercent(remainOn1kgBasis: unknown, trayWeight: unknown): n
 function isUsableTrayUuid(trayUuid: string | undefined): trayUuid is string {
   return Boolean(trayUuid && !/^0+$/.test(trayUuid));
 }
+
+const logger = createLogger("BambuPrinterRuntime");
 
 export class BambuPrinterRuntime implements PrinterRuntime {
   private readonly state = new Map<string, number>();
@@ -234,8 +236,8 @@ export class BambuPrinterRuntime implements PrinterRuntime {
           serial: this.config.serial,
           spoolTag: trayUuid,
           remainingWeightG,
-          previousWeightG: previousWeightG ?? null,
-          deltaG: previousWeightG === undefined ? 0 : remainingWeightG - previousWeightG,
+          previousWeight: previousWeightG ?? null,
+          delta: previousWeightG === undefined ? 0 : remainingWeightG - previousWeightG,
           topic
         });
 

@@ -1,5 +1,7 @@
-import { logger } from "../logger.ts";
+import { createLogger } from "../logger.ts";
 import type { SpoolmanConfig, SpoolUpdate } from "../types.ts";
+
+const logger = createLogger("SpoolmanClient");
 
 interface SpoolmanSpool {
   id: number;

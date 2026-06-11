@@ -1,9 +1,11 @@
 import "dotenv/config";
 
 import { loadConfig } from "./config.ts";
-import { logger } from "./logger.ts";
+import { createLogger } from "./logger.ts";
 import { SpoolmanClient } from "./services/spoolman.ts";
 import { PrinterSupervisor } from "./supervisor.ts";
+
+const logger = createLogger("App");
 
 async function main() {
   const config = loadConfig();

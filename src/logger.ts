@@ -2,6 +2,13 @@ import { inspect } from "node:util";
 
 import type { LogLevel } from "./types.ts";
 
+export interface Logger {
+  debug(message: string, context?: Record<string, unknown>): void;
+  info(message: string, context?: Record<string, unknown>): void;
+  warn(message: string, context?: Record<string, unknown>): void;
+  error(message: string, context?: Record<string, unknown>): void;
+}
+
 const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 10,
   info: 20,
@@ -69,6 +76,23 @@ function emit(level: LogLevel, message: string, context?: Record<string, unknown
   console.log(line);
 }
 
+function createScopedLogger(scope: string): Logger {
+  return {
+    debug(message: string, context?: Record<string, unknown>) {
+      emit("debug", `[${scope}] ${message}`, context);
+    },
+    info(message: string, context?: Record<string, unknown>) {
+      emit("info", `[${scope}] ${message}`, context);
+    },
+    warn(message: string, context?: Record<string, unknown>) {
+      emit("warn", `[${scope}] ${message}`, context);
+    },
+    error(message: string, context?: Record<string, unknown>) {
+      emit("error", `[${scope}] ${message}`, context);
+    }
+  };
+}
+
 export function setLogLevel(level: LogLevel) {
   minimumLevel = LOG_LEVELS[level];
 }
@@ -78,17 +102,6 @@ if (envLevel && envLevel in LOG_LEVELS) {
   setLogLevel(envLevel);
 }
 
-export const logger = {
-  debug(message: string, context?: Record<string, unknown>) {
-    emit("debug", message, context);
-  },
-  info(message: string, context?: Record<string, unknown>) {
-    emit("info", message, context);
-  },
-  warn(message: string, context?: Record<string, unknown>) {
-    emit("warn", message, context);
-  },
-  error(message: string, context?: Record<string, unknown>) {
-    emit("error", message, context);
-  }
-};
+export function createLogger(scope: string): Logger {
+  return createScopedLogger(scope);
+}
