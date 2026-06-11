@@ -1,6 +1,6 @@
 {
   "name": "spoolman-tracker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Simple service that listens to supported 3D printers and updates spool weight in Spoolman.",
   "type": "module",
