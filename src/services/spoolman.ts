@@ -5,6 +5,10 @@ interface SpoolmanSpool {
   id: number;
   remaining_weight: string | number | null;
   archived?: boolean;
+  filament?: {
+    material?: string | null;
+    name?: string | null;
+  };
   extra?: {
     tag?: string;
     [key: string]: unknown;
@@ -22,6 +26,35 @@ function toNumber(value: string | number | null | undefined): number | null {
   }
 
   return null;
+}
+
+function normalizeSpoolTag(tag: string | null | undefined): string | null {
+  if (typeof tag !== "string") {
+    return null;
+  }
+
+  const normalizedTag = tag.trim().replace(/^"+|"+$/g, "");
+  return normalizedTag || null;
+}
+
+function isSameRemainingWeight(currentWeight: number | null, nextWeight: number): boolean {
+  return currentWeight !== null && Math.round(currentWeight) === nextWeight;
+}
+
+function wouldIncreaseRemainingWeight(currentWeight: number | null, nextWeight: number): boolean {
+  return currentWeight !== null && nextWeight >= currentWeight;
+}
+
+function isUnconfirmedEmptySpoolReading(currentWeight: number | null, update: SpoolUpdate): boolean {
+  return currentWeight !== null && currentWeight > 0 && update.remainingWeight === 0 && update.previousWeight === null;
+}
+
+function extractSpoolInfoForLog(spool: SpoolmanSpool) {
+  return {
+    spoolId: spool.id,
+    filament: [spool.filament?.material ?? '', spool.filament?.name ?? ''].join(' - ').trim() || null,
+    tag: normalizeSpoolTag(spool.extra?.tag)
+  };
 }
 
 export class SpoolmanClient {
@@ -65,42 +98,55 @@ export class SpoolmanClient {
   }
 
   async updateRemainingWeight(update: SpoolUpdate): Promise<void> {
-    const spool = await this.findSpoolByTag(update.spoolTag);
+    const normalizedTag = normalizeSpoolTag(update.spoolTag);
+    
+    if (!normalizedTag) {
+      logger.warn("Skipping Spoolman update because spool tag is invalid", {
+        printerId: update.printerId,
+        tag: update.spoolTag
+      });
+      return;
+    }
 
+    const spool = await this.findSpoolByTag(normalizedTag);
     if (!spool) {
       logger.warn("Spoolman spool not found for tag", {
         printerId: update.printerId,
-        tag: update.spoolTag
+        tag: normalizedTag
       });
       return;
     }
 
     if (spool.archived) {
       logger.debug("Skipping Spoolman update because spool is archived", {
+        ...extractSpoolInfoForLog(spool),
         printerId: update.printerId,
-        spoolId: spool.id,
-        tag: update.spoolTag
       });
       return;
     }
 
     const currentWeight = toNumber(spool.remaining_weight);
-    if (currentWeight !== null && Math.round(currentWeight) === update.remainingWeight) {
-      logger.debug("Skipping Spoolman update because weight is unchanged", {
-        spoolId: spool.id,
-        tag: update.spoolTag,
-        remainingWeightG: update.remainingWeight
-      });
+    const newWeight = update.remainingWeight;
+
+    const logDetail = {
+      ...extractSpoolInfoForLog(spool),
+      previousWeight: currentWeight,
+      remainingWeight: newWeight,
+      printerId: update.printerId
+    };
+
+    if (isSameRemainingWeight(currentWeight, update.remainingWeight)) {
+      logger.debug("Skipping Spoolman update because weight is unchanged", logDetail);
       return;
     }
 
-    if (currentWeight !== null && update.remainingWeight >= currentWeight) {
-      logger.debug("Skipping Spoolman update because weight is not lower than current value", {
-        spoolId: spool.id,
-        tag: update.spoolTag,
-        currentWeightG: currentWeight,
-        remainingWeightG: update.remainingWeight
-      });
+    if (wouldIncreaseRemainingWeight(currentWeight, update.remainingWeight)) {
+      logger.debug("Skipping Spoolman update because weight is not lower than current value", logDetail);
+      return;
+    }
+
+    if (isUnconfirmedEmptySpoolReading(currentWeight, update)) {
+      logger.warn("Skipping unconfirmed empty-spool reading", logDetail);
       return;
     }
 
@@ -111,14 +157,7 @@ export class SpoolmanClient {
       })
     });
 
-    logger.info("Updated Spoolman remaining weight", {
-      printerId: update.printerId,
-      spoolId: spool.id,
-      tag: update.spoolTag,
-      currentWeightG: currentWeight,
-      remainingWeightG: update.remainingWeight,
-      previousWeightG: update.previousWeight
-    });
+    logger.info("Updated Spoolman remaining weight", logDetail);
   }
 
   async archiveZeroWeightSpools(): Promise<void> {
@@ -147,7 +186,9 @@ export class SpoolmanClient {
 
     logger.info("Archived empty Spoolman spools", {
       archivedCount: emptySpools.length,
-      spoolIds: emptySpools.map((spool) => spool.id)
+      spools: emptySpools.map((spool) => ({
+        ...extractSpoolInfoForLog(spool),
+      }))
     });
   }
 
@@ -173,7 +214,7 @@ export class SpoolmanClient {
     const cachedId = this.spoolIdByTag.get(tag);
     if (cachedId !== undefined) {
       const spool = await this.request<SpoolmanSpool | null>(`/spool/${cachedId}`, { method: "GET" }, true);
-      if (spool?.extra?.tag?.includes(tag)) {
+      if (normalizeSpoolTag(spool?.extra?.tag) === tag) {
         return spool;
       }
 
@@ -181,7 +222,7 @@ export class SpoolmanClient {
     }
 
     const spools = await this.request<SpoolmanSpool[]>("/spool?allow_archived=true", { method: "GET" });
-    const spool = spools.find((item) => item.extra?.tag?.includes(tag)) ?? null;
+    const spool = spools.find((item) => normalizeSpoolTag(item.extra?.tag) === tag) ?? null;
 
     if (spool) {
       this.spoolIdByTag.set(tag, spool.id);

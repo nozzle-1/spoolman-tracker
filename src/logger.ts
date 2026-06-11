@@ -40,8 +40,8 @@ function formatContext(context?: Record<string, unknown>) {
     depth: null,
     colors: useColor,
     compact: true,
-    breakLength: 120
-  });
+    breakLength: Number.POSITIVE_INFINITY
+  }).replace(/\s*\n\s*/g, " ");
 }
 
 function emit(level: LogLevel, message: string, context?: Record<string, unknown>) {

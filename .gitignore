@@ -3,3 +3,15 @@ dist/
 logs/
 config.json
 .env
+
+# AI agent tooling
+.codex/
+.agents/
+.claude/
+.cursor/
+.windsurf/
+.roo/
+.kiro/
+.aider*
+**/AGENTS.md
+**/CLAUDE.md
