@@ -6,6 +6,7 @@
       "changelog-path": "CHANGELOG.md",
       "initial-version": "0.1.0",
       "draft-pull-request": true,
+      "include-component-in-tag": false,
       "pull-request-header": "This PR prepares the next release."
     }
   }
