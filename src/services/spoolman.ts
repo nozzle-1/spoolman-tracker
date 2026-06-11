@@ -59,6 +59,10 @@ function extractSpoolInfoForLog(spool: SpoolmanSpool) {
   };
 }
 
+function nowAsIsoString(): string {
+  return new Date().toISOString();
+}
+
 export class SpoolmanClient {
   private readonly baseUrl: string;
   private readonly apiKey?: string;
@@ -155,7 +159,8 @@ export class SpoolmanClient {
     await this.request(`/spool/${spool.id}`, {
       method: "PATCH",
       body: JSON.stringify({
-        remaining_weight: String(update.remainingWeight)
+        remaining_weight: String(update.remainingWeight),
+        last_used: nowAsIsoString()
       })
     });
 
