@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/nozzle-1/spoolman-tracker/compare/v0.3.0...v0.3.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* enhance logs support ([45e3319](https://github.com/nozzle-1/spoolman-tracker/commit/45e33195f59a6a61424686b4f0bfccb2cdc0f4b7))
+
 ## [0.3.0](https://github.com/nozzle-1/spoolman-tracker/compare/v0.2.0...v0.3.0) (2026-06-11)
 
 
