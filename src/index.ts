@@ -4,10 +4,12 @@ import { loadConfig } from "./config.ts";
 import { createLogger } from "./logger.ts";
 import { SpoolmanClient } from "./services/spoolman.ts";
 import { PrinterSupervisor } from "./supervisor.ts";
+import { printStartupBanner } from "./banner.ts";
 
 const logger = createLogger("App");
 
 async function main() {
+  printStartupBanner();
   const config = loadConfig();
   const spoolman = new SpoolmanClient(config.spoolman);
   const supervisor = new PrinterSupervisor(config.printers, spoolman, config.supervision);
