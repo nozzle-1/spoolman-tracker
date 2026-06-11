@@ -1,0 +1,22 @@
+name: Update Release PR
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  update-release-pr:
+    name: Update release pull request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update release-please pull request
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
