@@ -235,7 +235,7 @@ export class BambuPrinterRuntime implements PrinterRuntime {
           printerId: this.config.id,
           serial: this.config.serial,
           spoolTag: trayUuid,
-          remainingWeightG,
+          remainingWeight: remainingWeightG,
           previousWeight: previousWeightG ?? null,
           delta: previousWeightG === undefined ? 0 : remainingWeightG - previousWeightG,
           topic
