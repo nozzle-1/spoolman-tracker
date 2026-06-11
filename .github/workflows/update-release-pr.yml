@@ -14,9 +14,22 @@ jobs:
   update-release-pr:
     name: Update release pull request
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      release_tag: ${{ steps.release.outputs.tag_name }}
     steps:
       - name: Update release-please pull request
+        id: release
         uses: googleapis/release-please-action@v4
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  publish-docker:
+    name: Publish Docker image for new release
+    needs: update-release-pr
+    if: ${{ needs.update-release-pr.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/publish-docker.yml
+    with:
+      release_tag: ${{ needs.update-release-pr.outputs.release_tag }}
+    secrets: inherit
