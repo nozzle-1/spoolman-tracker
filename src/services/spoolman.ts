@@ -75,6 +75,15 @@ export class SpoolmanClient {
       return;
     }
 
+    if (spool.archived) {
+      logger.debug("Skipping Spoolman update because spool is archived", {
+        printerId: update.printerId,
+        spoolId: spool.id,
+        tag: update.spoolTag
+      });
+      return;
+    }
+
     const currentWeight = toNumber(spool.remaining_weight);
     if (currentWeight !== null && Math.round(currentWeight) === update.remainingWeight) {
       logger.debug("Skipping Spoolman update because weight is unchanged", {
@@ -171,7 +180,7 @@ export class SpoolmanClient {
       this.spoolIdByTag.delete(tag);
     }
 
-    const spools = await this.request<SpoolmanSpool[]>("/spool?allow_archived=false", { method: "GET" });
+    const spools = await this.request<SpoolmanSpool[]>("/spool?allow_archived=true", { method: "GET" });
     const spool = spools.find((item) => item.extra?.tag?.includes(tag)) ?? null;
 
     if (spool) {
