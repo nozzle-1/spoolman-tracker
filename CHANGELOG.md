@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/nozzle-1/spoolman-tracker/compare/v0.4.0...v0.5.0) (2026-06-11)
+
+
+### Features
+
+* add last_used timestamp to spool update request ([17f0af1](https://github.com/nozzle-1/spoolman-tracker/commit/17f0af172132c2b9fed12a20ee57c754731ae5cc))
+
 ## [0.4.0](https://github.com/nozzle-1/spoolman-tracker/compare/v0.3.1...v0.4.0) (2026-06-11)
 
 
